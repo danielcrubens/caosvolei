@@ -11,13 +11,12 @@
 
     <div class="max-w-6xl mx-auto px-5 py-10 relative z-10">
       <header class="text-center pb-4 animate-slide-down">
-        <Text3d 
-    children="Caos no Volêi"
-    :speed="1.8"
-    :enable-shadows="true"
-    :enable-on-hover="false"
-          />
-     
+        <Text3d
+          children="Caos no Volêi"
+          :speed="1.8"
+          :enable-shadows="true"
+          :enable-on-hover="false"
+        />
       </header>
 
       <div class="flex gap-4 xl:pb-4 pb-10 justify-center flex-wrap">
@@ -26,11 +25,13 @@
           :key="tab.id"
           @click="selecionarTab(tab.id)"
           class="inline-block rounded-sm px-2 py-3 text-sm font-medium cursor-pointer transition-all"
-          :class="tabAtiva === tab.id 
-            ? 'border border-[#317ef2] bg-[#317ef2] text-white' 
-            : 'border border-[#317ef2] text-[#317ef2] hover:bg-[#317ef2] hover:text-white'"
+          :class="
+            tabAtiva === tab.id
+              ? 'border border-[#317ef2] bg-[#317ef2] text-white'
+              : 'border border-[#317ef2] text-[#317ef2] hover:bg-[#317ef2] hover:text-white'
+          "
         >
-           {{ tab.label }}
+          {{ tab.label }}
         </button>
       </div>
 
@@ -59,60 +60,60 @@
 </template>
 
 <script setup lang="ts">
-import RankingList from '@/components/RankingList.vue'
-import HistoricoTimeline from '@/components/HistoricoTimeline.vue'
-import ModalSenha from '@/components/ModalSenha.vue'
-import Text3d from '@/components/Text3d.vue'
+import RankingList from "@/components/RankingList.vue";
+import HistoricoTimeline from "~/components/HistoricoTimeline.vue";
+import ModalSenha from "@/components/ModalSenha.vue";
+import Text3d from "@/components/Text3d.vue";
 
 const tabs = [
-  { id: 'registro', label: 'Registrar Jogo' },
-  { id: 'ranking', label: 'Ranking' },
-  { id: 'historico', label: 'Histórico' }
-]
+  { id: "registro", label: "Registrar Jogo" },
+  { id: "ranking", label: "Ranking" },
+  { id: "historico", label: "Histórico" },
+];
 
-const tabAtiva = ref('ranking') 
-const formularioDesbloqueado = ref(false)
-const mostrarModalSenha = ref(false)
-const rankingRef = ref()
-const historicoRef = ref()
+const tabAtiva = ref("ranking");
+const formularioDesbloqueado = ref(false);
+const mostrarModalSenha = ref(false);
+const rankingRef = ref();
+const historicoRef = ref();
 
 const selecionarTab = (tabId: string) => {
-  if (tabId === 'registro' && !formularioDesbloqueado.value) {
-    mostrarModalSenha.value = true
-    return
+  if (tabId === "registro" && !formularioDesbloqueado.value) {
+    mostrarModalSenha.value = true;
+    return;
   }
-  tabAtiva.value = tabId
-}
+  tabAtiva.value = tabId;
+};
 
 const desbloquearFormulario = () => {
-  formularioDesbloqueado.value = true
-  tabAtiva.value = 'registro'
-}
+  formularioDesbloqueado.value = true;
+  tabAtiva.value = "registro";
+};
 
 const handleJogoRegistrado = () => {
   if (rankingRef.value) {
-    rankingRef.value.recarregar()
+    rankingRef.value.recarregar();
   }
   if (historicoRef.value) {
-    historicoRef.value.recarregar()
+    historicoRef.value.recarregar();
   }
-  tabAtiva.value = 'historico'
-}
+  tabAtiva.value = "historico";
+};
 
 const handleJogoRemovido = () => {
   if (rankingRef.value) {
-    rankingRef.value.recarregar()
+    rankingRef.value.recarregar();
   }
-}
+};
 
 useHead({
-  title: 'VolleyTrack - Sistema de Ranking de Vôlei',
+  title: "VolleyTrack - Sistema de Ranking de Vôlei",
   meta: [
     {
-      name: 'description',
-      content: 'Sistema para acompanhar e rankear jogadores de vôlei recreativo'
-    }
-  ]
-})
+      name: "description",
+      content:
+        "Sistema para acompanhar e rankear jogadores de vôlei recreativo",
+    },
+  ],
+});
 </script>
-
