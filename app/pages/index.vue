@@ -60,6 +60,11 @@
 </template>
 
 <script setup lang="ts">
+import RankingList from "../components/RankingList.vue";
+import HistoricoTimeline from "../components/HistoricoTimeline.vue";
+import ModalSenha from "../components/ModalSenha.vue";
+import Text3d from "../components/Text3d.vue";
+
 const tabs = [
   { id: "registro", label: "Registrar Jogo" },
   { id: "ranking", label: "Ranking" },
