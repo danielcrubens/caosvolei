@@ -103,9 +103,10 @@ const ranking = ref<any[]>([])
 const loading = ref(false)
 
 const rankingComPosicoes = computed(() => {
+  console.log('🎯 [RANKING] Computed chamado - ranking.value.length:', ranking.value.length)
   const resultado: any[] = []
   let posicaoAtual = 1
-  
+
   ranking.value.forEach((jogador, index) => {
     if (index > 0 && jogador.total_vitorias === ranking.value[index - 1].total_vitorias) {
       resultado.push({
@@ -120,7 +121,8 @@ const rankingComPosicoes = computed(() => {
       })
     }
   })
-  
+
+  console.log('🏆 [RANKING] Ranking com posições:', resultado)
   return resultado
 })
 
@@ -130,25 +132,28 @@ const capitalizarNome = (nome: string) => {
 }
 
 const carregarPeriodosDisponiveis = async () => {
+  console.log('📅 [RANKING] Iniciando carregamento de períodos disponíveis')
   const supabase = useSupabaseClient()
-  
+
   try {
     const { data: jogos, error } = await supabase
       .from('jogos')
       .select('data')
       .order('data', { ascending: false })
-    
+
+    console.log('📅 [RANKING] Jogos para períodos:', jogos, '| Error:', error)
+
     if (!error && jogos && jogos.length > 0) {
       const periodosSet = new Set<string>()
-      
+
       jogos.forEach(jogo => {
         const data = new Date(jogo.data + 'T00:00:00')
-        const mes = data.getMonth() + 1 
+        const mes = data.getMonth() + 1
         const ano = data.getFullYear()
         const chave = `${ano}-${String(mes).padStart(2, '0')}`
         periodosSet.add(chave)
       })
-      
+
       const periodos = Array.from(periodosSet)
         .sort((a, b) => a.localeCompare(b))
         .map(chave => {
@@ -156,23 +161,25 @@ const carregarPeriodosDisponiveis = async () => {
           const mesNum = parseInt(mes)
           return {
             chave,
-            nome: nomesMeses[mesNum - 1] 
+            nome: nomesMeses[mesNum - 1]
           }
         })
-      
+
       periodosDisponiveis.value = periodos
-      
+
       if (periodos.length > 0 && periodoSelecionado.value === 'todos') {
         periodoSelecionado.value = periodos[periodos.length - 1].chave
       }
-      
-      console.log('📅 Períodos disponíveis:', periodos)
+
+      console.log('📅 [RANKING] Períodos disponíveis:', periodos)
+      console.log('📅 [RANKING] Período selecionado:', periodoSelecionado.value)
     } else {
+      console.log('📅 [RANKING] Nenhum jogo encontrado ou erro:', error)
       periodosDisponiveis.value = []
       periodoSelecionado.value = 'todos'
     }
   } catch (error) {
-    console.error('Erro ao carregar períodos:', error)
+    console.error('❌ [RANKING] Erro ao carregar períodos:', error)
     periodosDisponiveis.value = []
     periodoSelecionado.value = 'todos'
   }
@@ -180,32 +187,42 @@ const carregarPeriodosDisponiveis = async () => {
 
 const carregarRanking = async () => {
   loading.value = true
-  console.log('🔄 Carregando ranking para período:', periodoSelecionado.value)
-  
+  console.log('🔄 [RANKING] Carregando ranking para período:', periodoSelecionado.value)
+  console.log('📍 [RANKING] URL Supabase:', import.meta.env.SUPABASE_URL ? 'Configurada' : 'NÃO CONFIGURADA')
+
   let resultado
-  
+
   if (periodoSelecionado.value === 'todos') {
     const anoAtual = new Date().getFullYear()
+    console.log('📅 [RANKING] Buscando ranking completo do ano:', anoAtual)
     resultado = await buscarRankingCompleto(anoAtual)
   } else {
     const [ano, mes] = periodoSelecionado.value.split('-')
+    console.log('📅 [RANKING] Buscando ranking do mês:', ano, mes)
     resultado = await buscarRankingPorMes(parseInt(ano), parseInt(mes))
   }
-  
+
+  console.log('📦 [RANKING] Resultado recebido:', resultado)
+
   if (resultado.success) {
     ranking.value = resultado.ranking || []
-    console.log('✅ Ranking carregado:', ranking.value.length, 'jogadores')
+    console.log('✅ [RANKING] Ranking carregado:', ranking.value.length, 'jogadores')
+    console.log('👥 [RANKING] Dados:', ranking.value)
   } else {
-    console.error('❌ Erro ao carregar ranking:', resultado.error)
+    console.error('❌ [RANKING] Erro ao carregar ranking:', resultado.error)
     ranking.value = []
   }
-  
+
   loading.value = false
+  console.log('⏳ [RANKING] Loading:', loading.value, '| Ranking length:', ranking.value.length)
 }
 
 onMounted(async () => {
+  console.log('🚀 [RANKING] Componente montado - Iniciando carregamento')
   await carregarPeriodosDisponiveis()
+  console.log('📊 [RANKING] Períodos carregados, iniciando ranking')
   await carregarRanking()
+  console.log('✅ [RANKING] Carregamento finalizado')
 })
 
 defineExpose({

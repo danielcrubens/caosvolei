@@ -114,14 +114,17 @@ const getNomeMes = (mesAno: string) => {
 }
 
 const carregarMesesDisponiveis = async () => {
+  console.log('📅 [HISTÓRICO] Iniciando carregamento de meses disponíveis')
   const supabase = useSupabaseClient()
-  
+
   try {
     const { data: jogosData, error } = await supabase
       .from('jogos')
       .select('data')
       .order('data', { ascending: false })
-    
+
+    console.log('📅 [HISTÓRICO] Jogos para meses:', jogosData, '| Error:', error)
+
     if (!error && jogosData) {
       const mesesUnicos = [...new Set(
         jogosData.map(j => {
@@ -130,17 +133,19 @@ const carregarMesesDisponiveis = async () => {
           const mes = String(date.getMonth() + 1).padStart(2, '0')
           return `${ano}-${mes}`
         })
-      )].sort() 
-      
+      )].sort()
+
       meses.value = mesesUnicos.map(mesAno => ({
         valor: mesAno,
         label: getNomeMes(mesAno)
       }))
-      
-      console.log(' Meses disponíveis no histórico:', meses.value)
+
+      console.log('✅ [HISTÓRICO] Meses disponíveis:', meses.value)
+    } else {
+      console.log('⚠️ [HISTÓRICO] Nenhum jogo encontrado ou erro:', error)
     }
   } catch (error) {
-    console.error('Erro ao carregar meses:', error)
+    console.error('❌ [HISTÓRICO] Erro ao carregar meses:', error)
     const hoje = new Date()
     const anoAtual = hoje.getFullYear()
     const mesAtual = String(hoje.getMonth() + 1).padStart(2, '0')
@@ -152,10 +157,10 @@ const carregarMesesDisponiveis = async () => {
 
 const carregarHistorico = async () => {
   loading.value = true
-  console.log(' Carregando histórico para mês:', mesFiltro.value || 'todos')
-  
+  console.log('🔄 [HISTÓRICO] Carregando histórico para mês:', mesFiltro.value || 'todos')
+
   const supabase = useSupabaseClient()
-  
+
   try {
     let query = supabase
       .from('jogos')
@@ -168,33 +173,39 @@ const carregarHistorico = async () => {
         )
       `)
       .order('data', { ascending: false })
-    
+
     if (mesFiltro.value) {
       const [ano, mes] = mesFiltro.value.split('-')
       const primeiroDia = `${ano}-${mes}-01`
       const ultimoDia = new Date(Number(ano), Number(mes), 0).getDate()
       const ultimoDiaFormatado = `${ano}-${mes}-${String(ultimoDia).padStart(2, '0')}`
-      
+
+      console.log('📅 [HISTÓRICO] Filtro de data:', primeiroDia, 'até', ultimoDiaFormatado)
+
       query = query
         .gte('data', primeiroDia)
         .lte('data', ultimoDiaFormatado)
     }
-    
+
     const { data: jogosData, error } = await query
-    
+
+    console.log('📦 [HISTÓRICO] Dados recebidos:', jogosData, '| Error:', error)
+
     if (!error && jogosData) {
       jogos.value = jogosData
-      console.log('✅ Histórico carregado:', jogos.value.length, 'jogos')
+      console.log('✅ [HISTÓRICO] Histórico carregado:', jogos.value.length, 'jogos')
+      console.log('🎮 [HISTÓRICO] Jogos:', jogos.value)
     } else {
-      console.error('❌ Erro ao carregar histórico:', error)
+      console.error('❌ [HISTÓRICO] Erro ao carregar histórico:', error)
       jogos.value = []
     }
   } catch (error) {
-    console.error('❌ Erro ao carregar histórico:', error)
+    console.error('❌ [HISTÓRICO] Erro ao carregar histórico:', error)
     jogos.value = []
   }
-  
+
   loading.value = false
+  console.log('⏳ [HISTÓRICO] Loading:', loading.value, '| Jogos length:', jogos.value.length)
 }
 
 const formatarData = (data: string) => {
@@ -235,8 +246,11 @@ const executarDelete = async () => {
 }
 
 onMounted(async () => {
+  console.log('🚀 [HISTÓRICO] Componente montado - Iniciando carregamento')
   await carregarMesesDisponiveis()
+  console.log('📊 [HISTÓRICO] Meses carregados, iniciando histórico')
   await carregarHistorico()
+  console.log('✅ [HISTÓRICO] Carregamento finalizado')
 })
 
 defineExpose({

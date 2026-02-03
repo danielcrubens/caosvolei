@@ -78,11 +78,18 @@ const rankingRef = ref();
 const historicoRef = ref();
 
 const selecionarTab = (tabId: string) => {
+  console.log('🔄 [INDEX] Tab selecionada:', tabId)
   if (tabId === "registro" && !formularioDesbloqueado.value) {
+    console.log('🔒 [INDEX] Formulário bloqueado, mostrando modal de senha')
     mostrarModalSenha.value = true;
     return;
   }
+  console.log('✅ [INDEX] Tab alterada de', tabAtiva.value, 'para', tabId)
   tabAtiva.value = tabId;
+
+  // Log para verificar se os refs estão disponíveis
+  console.log('📌 [INDEX] rankingRef disponível:', !!rankingRef.value)
+  console.log('📌 [INDEX] historicoRef disponível:', !!historicoRef.value)
 };
 
 const desbloquearFormulario = () => {
@@ -91,18 +98,29 @@ const desbloquearFormulario = () => {
 };
 
 const handleJogoRegistrado = () => {
+  console.log('🎮 [INDEX] Jogo registrado, recarregando componentes')
   if (rankingRef.value) {
+    console.log('🔄 [INDEX] Recarregando ranking')
     rankingRef.value.recarregar();
+  } else {
+    console.warn('⚠️ [INDEX] rankingRef não disponível')
   }
   if (historicoRef.value) {
+    console.log('🔄 [INDEX] Recarregando histórico')
     historicoRef.value.recarregar();
+  } else {
+    console.warn('⚠️ [INDEX] historicoRef não disponível')
   }
   tabAtiva.value = "historico";
 };
 
 const handleJogoRemovido = () => {
+  console.log('🗑️ [INDEX] Jogo removido, recarregando ranking')
   if (rankingRef.value) {
+    console.log('🔄 [INDEX] Recarregando ranking')
     rankingRef.value.recarregar();
+  } else {
+    console.warn('⚠️ [INDEX] rankingRef não disponível')
   }
 };
 
@@ -116,4 +134,12 @@ useHead({
     },
   ],
 });
+
+onMounted(() => {
+  console.log('🚀 [INDEX] Página montada - Tab inicial:', tabAtiva.value)
+  console.log('📌 [INDEX] Refs disponíveis:', {
+    ranking: !!rankingRef.value,
+    historico: !!historicoRef.value
+  })
+})
 </script>
