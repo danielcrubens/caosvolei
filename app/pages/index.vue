@@ -60,7 +60,7 @@
 </template>
 
 <script setup lang="ts">
-import RankingList from "../components/RankingList.vue";
+import RankingList from "../components/Rankinglist.vue";
 import HistoricoTimeline from "../components/Historicotimeline.vue";
 import ModalSenha from "../components/ModalSenha.vue";
 import Text3d from "../components/Text3d.vue";
