@@ -107,7 +107,7 @@ const handleJogoRemovido = () => {
 };
 
 useHead({
-  title: "VolleyTrack - Sistema de Ranking de Vôlei",
+  title: " Caos no Volêi | Sistema de Ranking de Vôlei",
   meta: [
     {
       name: "description",
