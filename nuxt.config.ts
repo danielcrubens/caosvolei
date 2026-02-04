@@ -10,7 +10,7 @@ export default defineNuxtConfig({
     autoImport: true,
   }, */
   components: true,
-  ssr:true,
+  ssr: false, // SPA - ideal para apps internos sem necessidade de SEO
   css: ['./app/assets/css/main.css'],
 
   vite: {
@@ -23,14 +23,15 @@ supabase: {
   redirect: false // ← Isso resolve o 404!
 },
 runtimeConfig: {
+    // Credenciais PRIVADAS (apenas servidor)
+    supabaseUrl: process.env.SUPABASE_URL,
+    supabaseKey: process.env.SUPABASE_KEY,
     public: {
-      supabaseUrl: process.env.SUPABASE_URL,
-      supabasePublishableKey: process.env.SSUPABASE_KEY,
-    },
+      // NADA exposto ao cliente
+    }
   },
   modules: ["@nuxtjs/supabase", "@nuxtjs/google-fonts"],
   googleFonts: {
-    base64: true,
     overwriting: true,
     families: {
       'Geist Mono': [400, 500, 700],

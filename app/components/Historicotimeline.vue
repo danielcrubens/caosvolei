@@ -85,7 +85,7 @@
 import { Volleyball, Trash2  } from "lucide-vue-next";
 import ModalSenha from '@/components/ModalSenha.vue'
 
-const { buscarJogos, deletarJogo } = useJogos()
+const { buscarJogos, deletarJogo, buscarDatasJogos } = useJogos()
 
 const props = defineProps({
   mostarDelete: {
@@ -114,18 +114,13 @@ const getNomeMes = (mesAno: string) => {
 }
 
 const carregarMesesDisponiveis = async () => {
-  const supabase = useSupabaseClient()
-
   try {
-    const { data: jogosData, error } = await supabase
-      .from('jogos')
-      .select('data')
-      .order('data', { ascending: false })
+    const { datas, success } = await buscarDatasJogos()
 
-    if (!error && jogosData) {
+    if (success && datas) {
       const mesesUnicos = [...new Set(
-        jogosData.map(j => {
-          const date = new Date(j.data + 'T00:00:00')
+        (datas as string[]).map(j => {
+          const date = new Date(j + 'T00:00:00')
           const ano = date.getFullYear()
           const mes = String(date.getMonth() + 1).padStart(2, '0')
           return `${ano}-${mes}`
@@ -150,39 +145,26 @@ const carregarMesesDisponiveis = async () => {
 const carregarHistorico = async () => {
   loading.value = true
 
-  const supabase = useSupabaseClient()
-
   try {
-    let query = supabase
-      .from('jogos')
-      .select(`
-        id,
-        data,
-        time_vencedor,
-        participacoes (
-          nome_jogador
-        )
-      `)
-      .order('data', { ascending: false })
+    let jogosData: any[] = []
 
     if (mesFiltro.value) {
+      // Filtro por mês - buscar todos e filtrar no cliente
       const [ano, mes] = mesFiltro.value.split('-')
-      const primeiroDia = `${ano}-${mes}-01`
-      const ultimoDia = new Date(Number(ano), Number(mes), 0).getDate()
-      const ultimoDiaFormatado = `${ano}-${mes}-${String(ultimoDia).padStart(2, '0')}`
-
-      query = query
-        .gte('data', primeiroDia)
-        .lte('data', ultimoDiaFormatado)
-    }
-
-    const { data: jogosData, error } = await query
-
-    if (!error && jogosData) {
-      jogos.value = jogosData
+      const resultado = await $fetch(`/api/jogos?ano=${ano}&limite=100`)
+      jogosData = (resultado as any[]).filter(j => {
+        const dataJogo = new Date(j.data + 'T00:00:00')
+        return dataJogo.getMonth() + 1 === Number(mes)
+      })
     } else {
-      jogos.value = []
+      // Sem filtro - buscar todos
+      const { jogos, success } = await buscarJogos(undefined, 100)
+      if (success) {
+        jogosData = jogos as any[]
+      }
     }
+
+    jogos.value = jogosData
   } catch (error) {
     jogos.value = []
   }

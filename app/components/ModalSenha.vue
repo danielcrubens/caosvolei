@@ -88,7 +88,6 @@ const emit = defineEmits<{
   (e: 'senha-correta'): void
 }>()
 
-const supabase = useSupabaseClient()
 const senhaDigitada = ref('')
 const erro = ref('')
 const carregando = ref(false)
@@ -118,22 +117,13 @@ const verificarSenha = async () => {
   erro.value = ''
 
   try {
-    // Buscar senha do banco
-    const { data, error } = await supabase
-      .from('configuracoes')
-      .select('senha_registro')
-      .eq('id', 1)
-      .single()
+    // Verificar senha via API (server-side)
+    const resultado = await $fetch('/api/verificar-senha', {
+      method: 'POST',
+      body: { senha: senhaDigitada.value }
+    }) as { correta: boolean }
 
-    if (error) {
-      console.error('Erro ao buscar senha:', error)
-      erro.value = 'Erro ao verificar senha. Tente novamente.'
-      carregando.value = false
-      return
-    }
-
-    // Verificar senha
-    if (senhaDigitada.value === data.senha_registro) {
+    if (resultado.correta) {
       emit('senha-correta')
       fechar()
     } else {

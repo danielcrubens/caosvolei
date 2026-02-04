@@ -91,6 +91,7 @@
 <script setup lang="ts">
 
 const { buscarRankingCompleto, buscarRankingPorMes } = useRanking()
+const { buscarDatasJogos } = useJogos()
 
 const nomesMeses = [
   'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
@@ -130,19 +131,15 @@ const capitalizarNome = (nome: string) => {
 }
 
 const carregarPeriodosDisponiveis = async () => {
-  const supabase = useSupabaseClient()
-
   try {
-    const { data: jogos, error } = await supabase
-      .from('jogos')
-      .select('data')
-      .order('data', { ascending: false })
+    const resultado = await buscarDatasJogos()
+    const { datas, success } = resultado
 
-    if (!error && jogos && jogos.length > 0) {
+    if (success && Array.isArray(datas) && datas.length > 0) {
       const periodosSet = new Set<string>()
 
-      jogos.forEach(jogo => {
-        const data = new Date(jogo.data + 'T00:00:00')
+      datas.forEach((jogo: string) => {
+        const data = new Date(jogo + 'T00:00:00')
         const mes = data.getMonth() + 1
         const ano = data.getFullYear()
         const chave = `${ano}-${String(mes).padStart(2, '0')}`
@@ -170,7 +167,7 @@ const carregarPeriodosDisponiveis = async () => {
       periodoSelecionado.value = 'todos'
     }
   } catch (error) {
-    console.error('❌ [RANKING] Erro ao carregar períodos:', error)
+    console.error('Erro ao carregar períodos:', error)
     periodosDisponiveis.value = []
     periodoSelecionado.value = 'todos'
   }

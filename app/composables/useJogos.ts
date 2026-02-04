@@ -1,37 +1,18 @@
 export const useJogos = () => {
-  const supabase = useSupabaseClient()
-
   // Registrar um novo jogo com jogadores
   const registrarJogo = async (data: string, timeVencedor: string, jogadores: string[]) => {
     try {
-      // 1. Inserir o jogo
-      const { data: jogo, error: jogoError } = await supabase
-        .from('jogos')
-        .insert({
+      const response = await $fetch('/api/jogos', {
+        method: 'POST',
+        body: {
           data,
-          time_vencedor: timeVencedor
-        })
-        .select()
-        .single()
+          timeVencedor,
+          jogadores
+        }
+      })
 
-      if (jogoError) throw jogoError
-
-      // 2. Inserir os jogadores (participações)
-      const participacoes = jogadores
-        .filter(j => j.trim() !== '') // Remove vazios
-        .map(jogador => ({
-          jogo_id: jogo.id,
-          nome_jogador: jogador.trim()
-        }))
-
-      const { error: participacoesError } = await supabase
-        .from('participacoes')
-        .insert(participacoes)
-
-      if (participacoesError) throw participacoesError
-
-      return { success: true, jogo }
-    } catch (error) {
+      return { success: true, jogo: (response as any).jogo }
+    } catch (error: any) {
       console.error('Erro ao registrar jogo:', error)
       return { success: false, error }
     }
@@ -40,33 +21,25 @@ export const useJogos = () => {
   // Buscar todos os jogos (com paginação)
   const buscarJogos = async (ano?: number, limite: number = 50) => {
     try {
-      let query = supabase
-        .from('jogos')
-        .select(`
-          id,
-          data,
-          time_vencedor,
-          participacoes (
-            nome_jogador
-          )
-        `)
-        .order('data', { ascending: false })
-        .limit(limite)
+      const params = new URLSearchParams()
+      if (ano) params.append('ano', String(ano))
+      params.append('limite', String(limite))
 
-      // Filtrar por ano se fornecido
-      if (ano) {
-        const inicioAno = `${ano}-01-01`
-        const fimAno = `${ano}-12-31`
-        query = query.gte('data', inicioAno).lte('data', fimAno)
-      }
-
-      const { data, error } = await query
-
-      if (error) throw error
-
+      const data = await $fetch(`/api/jogos?${params.toString()}`)
       return { success: true, jogos: data }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao buscar jogos:', error)
+      return { success: false, error }
+    }
+  }
+
+  // Buscar datas dos jogos (para timeline)
+  const buscarDatasJogos = async () => {
+    try {
+      const data = await $fetch('/api/jogos/datas')
+      return { success: true, datas: data }
+    } catch (error: any) {
+      console.error('Erro ao buscar datas:', error)
       return { success: false, error }
     }
   }
@@ -74,23 +47,9 @@ export const useJogos = () => {
   // Buscar jogo específico por ID
   const buscarJogoPorId = async (id: number) => {
     try {
-      const { data, error } = await supabase
-        .from('jogos')
-        .select(`
-          id,
-          data,
-          time_vencedor,
-          participacoes (
-            nome_jogador
-          )
-        `)
-        .eq('id', id)
-        .single()
-
-      if (error) throw error
-
-      return { success: true, jogo: data }
-    } catch (error) {
+      const jogo = await $fetch(`/api/jogos/${id}`)
+      return { success: true, jogo }
+    } catch (error: any) {
       console.error('Erro ao buscar jogo:', error)
       return { success: false, error }
     }
@@ -99,15 +58,11 @@ export const useJogos = () => {
   // Deletar jogo (cascade deleta participações)
   const deletarJogo = async (id: number) => {
     try {
-      const { error } = await supabase
-        .from('jogos')
-        .delete()
-        .eq('id', id)
-
-      if (error) throw error
-
+      await $fetch(`/api/jogos/${id}`, {
+        method: 'DELETE'
+      })
       return { success: true }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao deletar jogo:', error)
       return { success: false, error }
     }
@@ -116,6 +71,7 @@ export const useJogos = () => {
   return {
     registrarJogo,
     buscarJogos,
+    buscarDatasJogos,
     buscarJogoPorId,
     deletarJogo
   }
