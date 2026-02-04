@@ -9,7 +9,7 @@
       @senha-correta="desbloquearFormulario"
     />
 
-    <div class="max-w-6xl mx-auto px-5 py-10 relative z-10">
+    <div class="max-w-6xl mx-auto px-2 py-10 relative z-10">
       <header class="text-center pb-4 animate-slide-down">
         <Text3d
           children="Caos no Volêi"
@@ -24,7 +24,7 @@
           v-for="tab in tabs"
           :key="tab.id"
           @click="selecionarTab(tab.id)"
-          class="inline-block rounded-sm px-2 py-3 text-sm font-medium cursor-pointer transition-all"
+          class="inline-block rounded-sm xl:px-2 px-1.5 py-3 text-sm font-medium cursor-pointer transition-all"
           :class="
             tabAtiva === tab.id
               ? 'border border-[#317ef2] bg-[#317ef2] text-white'
@@ -78,18 +78,11 @@ const rankingRef = ref();
 const historicoRef = ref();
 
 const selecionarTab = (tabId: string) => {
-  console.log('🔄 [INDEX] Tab selecionada:', tabId)
   if (tabId === "registro" && !formularioDesbloqueado.value) {
-    console.log('🔒 [INDEX] Formulário bloqueado, mostrando modal de senha')
     mostrarModalSenha.value = true;
     return;
   }
-  console.log('✅ [INDEX] Tab alterada de', tabAtiva.value, 'para', tabId)
   tabAtiva.value = tabId;
-
-  // Log para verificar se os refs estão disponíveis
-  console.log('📌 [INDEX] rankingRef disponível:', !!rankingRef.value)
-  console.log('📌 [INDEX] historicoRef disponível:', !!historicoRef.value)
 };
 
 const desbloquearFormulario = () => {
@@ -98,29 +91,18 @@ const desbloquearFormulario = () => {
 };
 
 const handleJogoRegistrado = () => {
-  console.log('🎮 [INDEX] Jogo registrado, recarregando componentes')
   if (rankingRef.value) {
-    console.log('🔄 [INDEX] Recarregando ranking')
     rankingRef.value.recarregar();
-  } else {
-    console.warn('⚠️ [INDEX] rankingRef não disponível')
   }
   if (historicoRef.value) {
-    console.log('🔄 [INDEX] Recarregando histórico')
     historicoRef.value.recarregar();
-  } else {
-    console.warn('⚠️ [INDEX] historicoRef não disponível')
   }
   tabAtiva.value = "historico";
 };
 
 const handleJogoRemovido = () => {
-  console.log('🗑️ [INDEX] Jogo removido, recarregando ranking')
   if (rankingRef.value) {
-    console.log('🔄 [INDEX] Recarregando ranking')
     rankingRef.value.recarregar();
-  } else {
-    console.warn('⚠️ [INDEX] rankingRef não disponível')
   }
 };
 
@@ -134,12 +116,4 @@ useHead({
     },
   ],
 });
-
-onMounted(() => {
-  console.log('🚀 [INDEX] Página montada - Tab inicial:', tabAtiva.value)
-  console.log('📌 [INDEX] Refs disponíveis:', {
-    ranking: !!rankingRef.value,
-    historico: !!historicoRef.value
-  })
-})
 </script>

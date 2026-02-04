@@ -48,7 +48,7 @@
         :key="jogador.nome_jogador"
         class="ranking-item flex items-center rounded-lg border border-stone-300 p-4 shadow-lg"
       >
-        <span class="text-3xl mr-4">
+        <span class="xl:text-3xl text-xl mr-2">
           <template v-if="jogador.posicao <= 3">
             {{ ['🏆', '🥈', '🥉'][jogador.posicao - 1] }}
           </template>
@@ -58,7 +58,7 @@
         </span>
 
         <span
-          class="font-display text-4xl min-w-[80px] text-center"
+          class="font-display xl:text-4xl text-lg xl:min-w-[80px] text-center px-2"
           :class="{
             'text-yellow-500 drop-shadow-[2px_2px_0_rgba(0,0,0,0.2)]': jogador.posicao === 1,
             'text-gray-400 drop-shadow-[2px_2px_0_rgba(0,0,0,0.2)]': jogador.posicao === 2,
@@ -75,7 +75,7 @@
           </div>
         </div>
 
-        <div class="text-center text-zinc-600 mr-5">
+        <div class="text-center text-zinc-600 mr-0">
           <div class="font-display xl:text-3xl">
             {{ jogador.total_vitorias }}
           </div>
@@ -103,7 +103,6 @@ const ranking = ref<any[]>([])
 const loading = ref(false)
 
 const rankingComPosicoes = computed(() => {
-  console.log('🎯 [RANKING] Computed chamado - ranking.value.length:', ranking.value.length)
   const resultado: any[] = []
   let posicaoAtual = 1
 
@@ -122,7 +121,6 @@ const rankingComPosicoes = computed(() => {
     }
   })
 
-  console.log('🏆 [RANKING] Ranking com posições:', resultado)
   return resultado
 })
 
@@ -132,7 +130,6 @@ const capitalizarNome = (nome: string) => {
 }
 
 const carregarPeriodosDisponiveis = async () => {
-  console.log('📅 [RANKING] Iniciando carregamento de períodos disponíveis')
   const supabase = useSupabaseClient()
 
   try {
@@ -140,8 +137,6 @@ const carregarPeriodosDisponiveis = async () => {
       .from('jogos')
       .select('data')
       .order('data', { ascending: false })
-
-    console.log('📅 [RANKING] Jogos para períodos:', jogos, '| Error:', error)
 
     if (!error && jogos && jogos.length > 0) {
       const periodosSet = new Set<string>()
@@ -170,11 +165,7 @@ const carregarPeriodosDisponiveis = async () => {
       if (periodos.length > 0 && periodoSelecionado.value === 'todos') {
         periodoSelecionado.value = periodos[periodos.length - 1].chave
       }
-
-      console.log('📅 [RANKING] Períodos disponíveis:', periodos)
-      console.log('📅 [RANKING] Período selecionado:', periodoSelecionado.value)
     } else {
-      console.log('📅 [RANKING] Nenhum jogo encontrado ou erro:', error)
       periodosDisponiveis.value = []
       periodoSelecionado.value = 'todos'
     }
@@ -187,42 +178,30 @@ const carregarPeriodosDisponiveis = async () => {
 
 const carregarRanking = async () => {
   loading.value = true
-  console.log('🔄 [RANKING] Carregando ranking para período:', periodoSelecionado.value)
-  console.log('📍 [RANKING] URL Supabase:', import.meta.env.SUPABASE_URL ? 'Configurada' : 'NÃO CONFIGURADA')
 
   let resultado
 
   if (periodoSelecionado.value === 'todos') {
     const anoAtual = new Date().getFullYear()
-    console.log('📅 [RANKING] Buscando ranking completo do ano:', anoAtual)
     resultado = await buscarRankingCompleto(anoAtual)
   } else {
     const [ano, mes] = periodoSelecionado.value.split('-')
-    console.log('📅 [RANKING] Buscando ranking do mês:', ano, mes)
     resultado = await buscarRankingPorMes(parseInt(ano), parseInt(mes))
   }
 
-  console.log('📦 [RANKING] Resultado recebido:', resultado)
-
   if (resultado.success) {
     ranking.value = resultado.ranking || []
-    console.log('✅ [RANKING] Ranking carregado:', ranking.value.length, 'jogadores')
-    console.log('👥 [RANKING] Dados:', ranking.value)
   } else {
     console.error('❌ [RANKING] Erro ao carregar ranking:', resultado.error)
     ranking.value = []
   }
 
   loading.value = false
-  console.log('⏳ [RANKING] Loading:', loading.value, '| Ranking length:', ranking.value.length)
 }
 
 onMounted(async () => {
-  console.log('🚀 [RANKING] Componente montado - Iniciando carregamento')
   await carregarPeriodosDisponiveis()
-  console.log('📊 [RANKING] Períodos carregados, iniciando ranking')
   await carregarRanking()
-  console.log('✅ [RANKING] Carregamento finalizado')
 })
 
 defineExpose({
