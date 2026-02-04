@@ -58,7 +58,7 @@
         </span>
 
         <span
-          class="font-display xl:text-4xl text-lg xl:min-w-[80px] text-center px-2"
+          class="font-display xl:text-4xl text-lg xl:min-w-[80px] text-center pr-2"
           :class="{
             'text-yellow-500 drop-shadow-[2px_2px_0_rgba(0,0,0,0.2)]': jogador.posicao === 1,
             'text-gray-400 drop-shadow-[2px_2px_0_rgba(0,0,0,0.2)]': jogador.posicao === 2,

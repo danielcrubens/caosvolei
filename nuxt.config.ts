@@ -6,11 +6,9 @@ export default defineNuxtConfig({
     compatibilityVersion: 4
   },
   devtools: { enabled: true },
-/*   imports: {
-    autoImport: true,
-  }, */
+
   components: true,
-  ssr: false, // SPA - ideal para apps internos sem necessidade de SEO
+  ssr: false, 
   css: ['./app/assets/css/main.css'],
 
   vite: {
@@ -23,11 +21,9 @@ supabase: {
   redirect: false // ← Isso resolve o 404!
 },
 runtimeConfig: {
-    // Credenciais PRIVADAS (apenas servidor)
     supabaseUrl: process.env.SUPABASE_URL,
     supabaseKey: process.env.SUPABASE_KEY,
     public: {
-      // NADA exposto ao cliente
     }
   },
   modules: ["@nuxtjs/supabase", "@nuxtjs/google-fonts"],
